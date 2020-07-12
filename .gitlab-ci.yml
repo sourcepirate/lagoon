@@ -21,7 +21,7 @@ lint_and_test:
 builder:
   stage: build
   script:
-    - apk update && apk add --no-cache curl jq python py-pip git
+    - apk update && apk add --no-cache curl git
     - docker login registry.gitlab.com --username $USERNAME --password $PASSWORD
     - export VERSION=$(git rev-parse --short HEAD)
     - docker build -t registry.gitlab.com/sanathana/lagoon:$VERSION
