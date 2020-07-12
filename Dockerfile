@@ -1,7 +1,8 @@
 FROM rustlang/rust:nightly-buster-slim AS build
 
+ENV OPENSSL_STATIC=1
 RUN apt-get update
-RUN apt-get install -y build-essential clang
+RUN apt-get install -y build-essential clang libssl-dev pkg-config
 
 WORKDIR /app
 COPY . /app
