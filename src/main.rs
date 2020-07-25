@@ -1,11 +1,30 @@
-extern crate rusoto_core;
-extern crate rusoto_s3;
-extern crate sonic_client;
-extern crate md5;
+extern crate jsonrpc_derive;
+extern crate jsonrpc_core;
+extern crate jsonrpc_tcp_server;
+extern crate bit_vec;
+extern crate fasthash;
+
+pub mod handler;
+pub mod rpc;
+pub mod bloom;
 
 
-pub mod store;
+use jsonrpc_tcp_server::*;
+use jsonrpc_tcp_server::jsonrpc_core::*;
+use rpc::BloomRPC;
+
+
+
+
 
 fn main() {
-    println!("Hello, world!");
+    let storage_rpc = handler::BloomFilter::new();
+    let mut io = IoHandler::new();
+    io.extend_with(storage_rpc.to_delegate());
+    println!("Server starting up!!");
+    let server = ServerBuilder::new(io)
+		.start(&"0.0.0.0:3030".parse().unwrap())
+		.expect("Server must start with no issues");
+
+	server.wait()
 }

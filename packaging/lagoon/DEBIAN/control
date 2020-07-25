@@ -1,0 +1,8 @@
+Package: lagoon
+Version: 0.0.1
+Section: custom
+Priority: optional
+Architecture: all
+Essential: no
+Maintainer: codelantics.com
+Description: lagoon filter

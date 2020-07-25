@@ -1,0 +1,13 @@
+[Unit]
+Description=Lagoon Service
+After=network.target
+
+[Service]
+PrivateTmp=true
+PIDFile=/var/run/lagoon/%i.pid
+ExecStart=/usr/bin/lagoon
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

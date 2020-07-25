@@ -1,0 +1,25 @@
+language: rust
+cache: cargo
+dist: trusty
+os:
+- linux
+rust:
+- nightly
+- stable
+env:
+  global:
+  - CRATE_NAME=lagoon
+before_script:
+- chmod +x ./ci/ci.sh
+- chmod +x ./packaging/build.sh
+script:
+- "./ci/ci.sh"
+- "cd packaging/ && ./build.sh release"
+deploy:
+  api_key: "$GITHUB_OAUTH_TOKEN"
+  file_glob: true
+  file: "/release/*"
+  provider: releases
+  skip_cleanup: true
+  on:
+    tags: true
