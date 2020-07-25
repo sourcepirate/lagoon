@@ -36,7 +36,6 @@ pub struct BloomNode {
 impl BloomNode {
     pub fn new(m: usize, k: usize) -> Self {
         let n: usize = ((m / k) as f64 * 2_f64.ln()) as usize;
-        println!("{:?}", (m, k, n));
         BloomNode {
             inner: BitVec::from_elem(m as usize, false),
             m,
