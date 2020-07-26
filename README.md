@@ -4,6 +4,8 @@ An inmemory and highly concurrent bloom filter service based on json-rpc.
 
 [![Build Status](https://travis-ci.org/sourcepirate/lagoon.svg?branch=master)](https://travis-ci.org/sourcepirate/lagoon)
 
+![](https://cdn1.iconfinder.com/data/icons/african-animals-1/800/chimpanzee-512.png)
+
 ## Build 
 
 ```
