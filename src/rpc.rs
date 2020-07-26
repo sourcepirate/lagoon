@@ -14,4 +14,7 @@ pub trait BloomRPC {
 
     #[rpc(name = "setKey")]
     fn set_key(&self, collection: String, val: String) -> Result<bool>;
+
+    #[rpc(name = "deleteCollection")]
+    fn delete(&self, collection: String) -> Result<bool>;
 }

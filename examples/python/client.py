@@ -12,7 +12,7 @@ def is_socket_closed(sock: socket.socket) -> bool:
         return False  # socket is open and reading from it would block
     except ConnectionResetError:
         return True  # socket was closed for some other reason
-    except Exception as e:
+    except Exception:
         return False
     return False
 
@@ -88,6 +88,12 @@ class LagoonClient(object):
         self._rpc_id += 1
         return data
 
+    def delete_collection(self, collection_name):
+        self.invoke(self._rpc_id, "deleteCollection", collection_name)
+        data = self.recieve()
+        self._rpc_id += 1
+        return data
+
 
 if __name__ == "__main__":
     lagoon = LagoonClient("localhost", 3030)
@@ -95,3 +101,4 @@ if __name__ == "__main__":
     print(lagoon.exist("hello", "key"))
     print(lagoon.set_key("hello", "key1"))
     print(lagoon.exist("hello", "key1"))
+    print(lagoon.delete_collection("hello"))

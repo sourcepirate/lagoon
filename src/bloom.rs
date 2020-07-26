@@ -146,6 +146,14 @@ impl BloomCollection {
             None => Err(BloomError::DoesNotExist),
         }
     }
+
+    pub fn delete(&mut self, collection: String) -> Result<(), BloomError> {
+        let tex = self._inner.remove(&collection);
+        match tex {
+            Some(_) => Ok(()),
+            None => Err(BloomError::DoesNotExist),
+        }
+    }
 }
 
 impl BloomError {

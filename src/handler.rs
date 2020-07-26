@@ -39,6 +39,15 @@ impl BloomRPC for BloomFilter {
             Err(_e) => Err(Error::new(ErrorCode::ServerError(_e.code()))),
         }
     }
+
+    fn delete(&self, collection: String) -> Result<bool> {
+        let data = self.inner.clone();
+        let mut guard = data.lock().unwrap();
+        match guard.delete(collection) {
+            Ok(_) => Ok(true),
+            Err(_e) => Err(Error::new(ErrorCode::ServerError(_e.code()))),
+        }
+    }
 }
 
 impl BloomFilter {
