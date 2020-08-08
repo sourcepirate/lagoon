@@ -48,3 +48,9 @@ nc localhost 3030
 {"jsonrpc":"2.0","result":false,"id":5}
 
 ```
+
+## Client Libraries
+
+### Python
+
+https://pypi.org/project/lagoon-python/
