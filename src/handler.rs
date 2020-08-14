@@ -48,6 +48,15 @@ impl BloomRPC for BloomFilter {
             Err(_e) => Err(Error::new(ErrorCode::ServerError(_e.code()))),
         }
     }
+
+    fn has_collection(&self, collection: String) -> Result<bool> {
+        let data = self.inner.clone();
+        let mut guard = data.lock().unwrap();
+        match guard.has_collection(collection) {
+            Ok(flag) => Ok(flag),
+            Err(_e) => Err(Error::new(ErrorCode::ServerError(_e.code()))),
+        }
+    }
 }
 
 impl BloomFilter {

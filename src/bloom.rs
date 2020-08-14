@@ -154,6 +154,14 @@ impl BloomCollection {
             None => Err(BloomError::DoesNotExist),
         }
     }
+
+    pub fn has_collection(&mut self, collection: String) -> Result<bool, BloomError> {
+        let tex = self._inner.get(&collection);
+        match tex {
+            Some(_) => Ok(true),
+            None => Ok(false),
+        }
+    }
 }
 
 impl BloomError {

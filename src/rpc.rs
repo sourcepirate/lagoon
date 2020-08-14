@@ -17,4 +17,7 @@ pub trait BloomRPC {
 
     #[rpc(name = "deleteCollection")]
     fn delete(&self, collection: String) -> Result<bool>;
+
+    #[rpc(name = "hasCollection")]
+    fn has_collection(&self, collection: String) -> Result<bool>;
 }
