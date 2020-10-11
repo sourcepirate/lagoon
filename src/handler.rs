@@ -14,6 +14,7 @@ impl BloomRPC for BloomFilter {
     }
 
     fn create(&self, collection: String) -> Result<bool> {
+        debug!("Create Collection -- {}", collection);
         let data = self.inner.clone();
         let mut guard = data.lock().unwrap();
         match guard.create(collection, BloomNode::max_bits(), BloomNode::max_hash()) {
@@ -41,6 +42,7 @@ impl BloomRPC for BloomFilter {
     }
 
     fn delete(&self, collection: String) -> Result<bool> {
+        debug!("Delete collection -- {}", collection);
         let data = self.inner.clone();
         let mut guard = data.lock().unwrap();
         match guard.delete(collection) {
@@ -50,6 +52,7 @@ impl BloomRPC for BloomFilter {
     }
 
     fn has_collection(&self, collection: String) -> Result<bool> {
+        debug!("Has Collection -- {}", collection);
         let data = self.inner.clone();
         let mut guard = data.lock().unwrap();
         match guard.has_collection(collection) {
