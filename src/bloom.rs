@@ -3,6 +3,7 @@ use fasthash::murmur3::hash128_with_seed;
 use std::collections::BTreeMap;
 use std::sync::{Arc, Mutex};
 
+#[derive(Debug)]
 pub enum BloomError {
     DoesNotExist,
     DuplicateError,
@@ -172,5 +173,48 @@ impl BloomError {
             &BloomError::MaxEntryReached => 102,
             &BloomError::Other => 103,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_bloom_filter_on_collection() {
+        let mut filter = BloomCollection::new();
+        let collection_name = "hello".to_owned();
+        let _ = filter.create(
+            collection_name.clone(),
+            BloomNode::max_bits(),
+            BloomNode::max_hash(),
+        );
+        for n in 0..1000 {
+            let _ = filter.set(collection_name.clone(), n.to_string());
+        }
+        for i in 0..1000 {
+            let flag: bool = filter
+                .exist(collection_name.clone(), i.to_string())
+                .unwrap();
+            assert!(flag);
+        }
+    }
+
+    #[test]
+    fn test_create_and_remove_collection() {
+        let mut filter = BloomCollection::new();
+        let collection_name = "hello".to_owned();
+        let mut flag: bool = filter.has_collection(collection_name.clone()).unwrap();
+        assert!(!flag);
+        let _ = filter.create(
+            collection_name.clone(),
+            BloomNode::max_bits(),
+            BloomNode::max_hash(),
+        );
+        flag = filter.has_collection(collection_name.clone()).unwrap();
+        assert!(flag);
+        let _ = filter.delete(collection_name.clone());
+        flag = filter.has_collection(collection_name.clone()).unwrap();
+        assert!(!flag);
     }
 }
