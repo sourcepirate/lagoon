@@ -2,40 +2,40 @@
 extern crate log;
 extern crate bit_vec;
 extern crate fasthash;
-extern crate structopt;
 extern crate jsonrpc_core;
 extern crate jsonrpc_derive;
-extern crate jsonrpc_tcp_server;
 extern crate jsonrpc_lite;
+extern crate jsonrpc_tcp_server;
 extern crate serde_json;
+extern crate structopt;
 
 pub mod bloom;
 pub mod handler;
-pub mod rpc;
 pub mod replication;
+pub mod rpc;
 
-use std::thread;
-use std::str::FromStr;
-use structopt::StructOpt;
-use std::net::SocketAddr;
-use std::sync::mpsc::channel;
 use jsonrpc_tcp_server::jsonrpc_core::*;
 use jsonrpc_tcp_server::*;
 use rpc::BloomRPC;
+use std::net::SocketAddr;
+use std::str::FromStr;
+use std::sync::mpsc::channel;
+use std::thread;
+use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
-#[structopt(name="lagoon")]
+#[structopt(name = "lagoon")]
 struct Opt {
     addr: SocketAddr,
-    #[structopt(short="p", long="peers")]
-    peers: Option<Vec<SocketAddr>>
+    #[structopt(short = "p", long = "peers")]
+    peers: Option<Vec<SocketAddr>>,
 }
 
 impl Default for Opt {
     fn default() -> Self {
         Opt {
             addr: FromStr::from_str("0.0.0.0:3030").unwrap(),
-            peers: None
+            peers: None,
         }
     }
 }
@@ -57,5 +57,4 @@ fn main() {
         .start(&opt.addr)
         .expect("Server must start with no issues");
     server.wait()
-
 }

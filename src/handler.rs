@@ -1,13 +1,13 @@
 // use jsonrpc_derive::rpc;
 use super::bloom::{BloomCollection, BloomNode};
-use super::rpc::BloomRPC;
 use super::replication::Message;
+use super::rpc::BloomRPC;
 use jsonrpc_core::{Error, ErrorCode, Result};
-use std::sync::{Arc, Mutex, mpsc};
+use std::sync::{mpsc, Arc, Mutex};
 
 pub struct BloomFilter {
     inner: Arc<Mutex<BloomCollection>>,
-    sender: Arc<Mutex<mpsc::Sender<Message>>>
+    sender: Arc<Mutex<mpsc::Sender<Message>>>,
 }
 
 impl BloomRPC for BloomFilter {
@@ -21,11 +21,15 @@ impl BloomRPC for BloomFilter {
         let sender_clone = self.sender.clone();
         let mut guard = data.lock().unwrap();
         let send_guard = sender_clone.lock().unwrap();
-        match guard.create(collection.clone(), BloomNode::max_bits(), BloomNode::max_hash()) {
+        match guard.create(
+            collection.clone(),
+            BloomNode::max_bits(),
+            BloomNode::max_hash(),
+        ) {
             Ok(_) => {
                 send_guard.send(Message::Create(collection)).unwrap();
                 Ok(true)
-            },
+            }
             Err(_e) => Err(Error::new(ErrorCode::ServerError(_e.code()))),
         }
     }
@@ -46,10 +50,10 @@ impl BloomRPC for BloomFilter {
         let guard = data.lock().unwrap();
         let send_guard = sender_clone.lock().unwrap();
         match guard.set(collection.clone(), val.clone()) {
-            Ok(_) =>{
+            Ok(_) => {
                 send_guard.send(Message::Set(collection, val)).unwrap();
                 Ok(true)
-            },
+            }
             Err(_e) => Err(Error::new(ErrorCode::ServerError(_e.code()))),
         }
     }
@@ -64,7 +68,7 @@ impl BloomRPC for BloomFilter {
             Ok(_) => {
                 send_guard.send(Message::Delete(collection)).unwrap();
                 Ok(true)
-            },
+            }
             Err(_e) => Err(Error::new(ErrorCode::ServerError(_e.code()))),
         }
     }
@@ -84,7 +88,7 @@ impl BloomFilter {
     pub fn new(tx: mpsc::Sender<Message>) -> Self {
         BloomFilter {
             inner: Arc::new(Mutex::new(BloomCollection::new())),
-            sender: Arc::new(Mutex::new(tx.clone()))
+            sender: Arc::new(Mutex::new(tx.clone())),
         }
     }
 }
