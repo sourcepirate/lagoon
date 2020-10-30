@@ -1,12 +1,10 @@
 //! Contains the code for message to be send to the remote server
 //! The below given message is then translated into the appropriate rpc.
 //! and forwarded to the respective peers.
-use jsonrpc_core::Value;
-use jsonrpc_lite::{JsonRpc, Params};
-use serde_json::to_string;
-use std::io::Write;
-use std::net::{SocketAddr, TcpStream};
-use std::sync::mpsc;
+use super::bloom::BloomCollection;
+use std::io::{self, Write};
+use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4, TcpListener, TcpStream};
+use std::sync::{mpsc, Arc, Mutex};
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -29,64 +27,49 @@ impl Default for Message {
     }
 }
 
-impl Into<JsonRpc> for Message {
-    fn into(self) -> JsonRpc {
-        match &self {
-            &Message::Create(ref collection) => JsonRpc::request_with_params(
-                1,
-                "createCollection",
-                Params::Array(vec![Value::String(collection.clone())]),
-            ),
-            &Message::Set(ref collection, ref bitval) => JsonRpc::request_with_params(
-                1,
-                "setKey",
-                Params::Array(vec![
-                    Value::String(collection.clone()),
-                    Value::String(bitval.clone()),
-                ]),
-            ),
-            &Message::Delete(ref collection) => JsonRpc::request_with_params(
-                1,
-                "deleteCollection",
-                Params::Array(vec![Value::String(collection.clone())]),
-            ),
-            &Message::None => JsonRpc::request_with_params(1, "version", Params::Array(vec![])),
-        }
-    }
+pub struct GossipController {
+    listener: TcpListener,
+    store: Arc<Mutex<BloomCollection>>,
 }
 
 pub struct ReplicationController {
     inner: mpsc::Receiver<Message>,
     peers: Option<Vec<SocketAddr>>,
+    store: Arc<Mutex<BloomCollection>>,
 }
 
 impl ReplicationController {
-    pub fn new(recv: mpsc::Receiver<Message>, peers: Option<Vec<SocketAddr>>) -> Self {
+    pub fn new(
+        recv: mpsc::Receiver<Message>,
+        store: Arc<Mutex<BloomCollection>>,
+        peers: Option<Vec<SocketAddr>>,
+    ) -> Self {
         ReplicationController {
             inner: recv,
             peers: peers,
+            store: store,
         }
     }
 
-    pub fn run(&self) -> () {
-        let mut connections: Vec<TcpStream> = Vec::new();
-        if self.peers.is_some() {
-            for peer in self.peers.as_ref().unwrap() {
-                connections.push(TcpStream::connect(peer).unwrap())
-            }
-        }
+    pub fn run(&self) -> io::Result<()> {
         loop {
             let msg: Message = self.inner.recv().unwrap_or_default();
-            let rpc: JsonRpc = msg.into();
-            for connection in connections.iter_mut() {
-                if let &JsonRpc::Request(ref _request) = &rpc {
-                    let str_value = to_string(&_request).unwrap() + "\n";
-                    info!("{}", str_value);
-                    connection.write(str_value.as_bytes()).unwrap();
-                    connection.flush().unwrap();
-                    info!("replication message");
-                }
-            }
         }
+    }
+}
+
+impl GossipController {
+    pub fn new(store: Arc<Mutex<BloomCollection>>, gossip: u16) -> io::Result<Self> {
+        Ok(GossipController {
+            store,
+            listener: TcpListener::bind(SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), gossip))?,
+        })
+    }
+
+    pub fn listen(&self) -> io::Result<()> {
+        for incoming in self.listener.incoming() {
+            println!("{:?}", incoming?);
+        }
+        Ok(())
     }
 }

@@ -21,15 +21,11 @@ impl BloomRPC for BloomFilter {
         let sender_clone = self.sender.clone();
         let mut guard = data.lock().unwrap();
         let send_guard = sender_clone.lock().unwrap();
-        match guard.create(
-            collection.clone(),
-            BloomNode::max_bits(),
-            BloomNode::max_hash(),
-        ) {
-            Ok(_) => {
-                send_guard.send(Message::Create(collection)).unwrap();
-                Ok(true)
-            }
+        send_guard
+            .send(Message::Create(collection.clone()))
+            .unwrap();
+        match guard.create(collection, BloomNode::max_bits(), BloomNode::max_hash()) {
+            Ok(_) => Ok(true),
             Err(_e) => Err(Error::new(ErrorCode::ServerError(_e.code()))),
         }
     }
@@ -49,11 +45,11 @@ impl BloomRPC for BloomFilter {
         let sender_clone = self.sender.clone();
         let guard = data.lock().unwrap();
         let send_guard = sender_clone.lock().unwrap();
-        match guard.set(collection.clone(), val.clone()) {
-            Ok(_) => {
-                send_guard.send(Message::Set(collection, val)).unwrap();
-                Ok(true)
-            }
+        send_guard
+            .send(Message::Set(collection.clone(), val.clone()))
+            .unwrap();
+        match guard.set(collection, val) {
+            Ok(_) => Ok(true),
             Err(_e) => Err(Error::new(ErrorCode::ServerError(_e.code()))),
         }
     }
@@ -64,11 +60,11 @@ impl BloomRPC for BloomFilter {
         let sender_clone = self.sender.clone();
         let mut guard = data.lock().unwrap();
         let send_guard = sender_clone.lock().unwrap();
-        match guard.delete(collection.clone()) {
-            Ok(_) => {
-                send_guard.send(Message::Delete(collection)).unwrap();
-                Ok(true)
-            }
+        send_guard
+            .send(Message::Delete(collection.clone()))
+            .unwrap();
+        match guard.delete(collection) {
+            Ok(_) => Ok(true),
             Err(_e) => Err(Error::new(ErrorCode::ServerError(_e.code()))),
         }
     }
@@ -85,9 +81,9 @@ impl BloomRPC for BloomFilter {
 }
 
 impl BloomFilter {
-    pub fn new(tx: mpsc::Sender<Message>) -> Self {
+    pub fn new(tx: mpsc::Sender<Message>, store: Arc<Mutex<BloomCollection>>) -> Self {
         BloomFilter {
-            inner: Arc::new(Mutex::new(BloomCollection::new())),
+            inner: store,
             sender: Arc::new(Mutex::new(tx.clone())),
         }
     }
